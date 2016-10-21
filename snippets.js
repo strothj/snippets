@@ -23,7 +23,6 @@ MongoClient.connect('mongodb://localhost', (connErr, db) => {
       console.log('Created snippet', name);
       db.close();
     });
-    db.close();
   };
 
   const read = (name) => {
@@ -38,15 +37,38 @@ MongoClient.connect('mongodb://localhost', (connErr, db) => {
       console.log(snippet.content);
       db.close();
     });
-    db.close();
   };
 
   const update = (name, content) => {
-    db.close();
+    const query = { name };
+    const update = {
+      $set: { content },
+    };
+
+    collection.findAndModify(query, null, update, (err, result) => {
+      const snippet = result.value;
+      if (!snippet || err) {
+        console.error('Could not update snippet', name);
+        db.close();
+        return;
+      }
+      console.log('Updated snippet', snippet.name);
+      db.close();
+    });
   };
 
   const del = (name, content) => {
-    db.close();
+    const query = { name };
+    collection.findAndRemove(query, (err, result) => {
+      const snippet = result.value;
+      if (!snippet || err) {
+        console.error('Could not delete snippet', name);
+        db.close();
+        return;
+      }
+      console.log('Deleted snippet', snippet.name);
+      db.close();
+    });
   };
 
   const main = () => {
